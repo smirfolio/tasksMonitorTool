@@ -13,37 +13,18 @@ A lightweight Python tool for monitoring system health metrics including CPU usa
 ## Requirements
 
 - Python 3.12 or higher
-- psutil library
+- uv python package management
 
 ## Installation
 
 This tool uses PEP 723 inline script metadata, which means dependencies are automatically managed when run with compatible Python package managers.
-
-### Option 1: Using uv (Recommended)
-
-```bash
-uv run monitor.py
-```
-
-### Option 2: Manual Installation
-
-```bash
-pip install psutil
-python monitor.py
-```
-
-### Option 3: Using pipx
-
-```bash
-pipx run monitor.py
-```
 
 ## Usage
 
 Simply run the script to get current system health metrics:
 
 ```bash
-python monitor.py
+uv run monitor.py
 ```
 
 ## Output Format
@@ -89,7 +70,7 @@ The tool outputs a JSON object with the following structure:
 ### Basic Usage
 
 ```bash
-$ python monitor.py
+$ uv run monitor.py
 {
     "status": "healthy",
     "cpu_usage": 12.5,
@@ -109,26 +90,26 @@ $ python monitor.py
 ### Saving Output to File
 
 ```bash
-python monitor.py > system_health.json
+uv run monitor.py > system_health.json
 ```
 
 ### Using with jq for Formatted Output
 
 ```bash
-python monitor.py | jq '.'
+uv run monitor.py | jq '.'
 ```
 
 ### Extracting Specific Metrics
 
 ```bash
 # Get only CPU usage
-python monitor.py | jq '.cpu_usage'
+puv runthon monitor.py | jq '.cpu_usage'
 
 # Get memory usage percentage
-python monitor.py | jq '.memory_percent'
+uv run monitor.py | jq '.memory_percent'
 
 # Get disk usage
-python monitor.py | jq '{disk_used, disk_free, disk_percent}'
+uv run monitor.py | jq '{disk_used, disk_free, disk_percent}'
 ```
 
 ## Integration Examples
@@ -139,7 +120,7 @@ python monitor.py | jq '{disk_used, disk_free, disk_percent}'
 #!/bin/bash
 # Simple monitoring script
 while true; do
-    echo "$(date): $(python monitor.py | jq '.cpu_usage')% CPU"
+    echo "$(date): $(uv run monitor.py | jq '.cpu_usage')% CPU"
     sleep 60
 done
 ```
@@ -151,7 +132,7 @@ import subprocess
 import json
 
 def get_system_metrics():
-    result = subprocess.run(['python', 'monitor.py'], 
+    result = subprocess.run(['uv', 'run', 'monitor.py'], 
                           capture_output=True, text=True)
     return json.loads(result.stdout)
 
@@ -166,22 +147,22 @@ Monitor system health on remote servers using SSH:
 
 ```bash
 # Basic remote monitoring
-ssh user@remote-server 'python /path/to/monitor.py'
+ssh user@remote-server 'uv run /path/to/monitor.py'
 
 # Monitor multiple servers
 for server in server1 server2 server3; do
     echo "=== $server ==="
-    ssh user@$server 'python /path/to/monitor.py' | jq '{cpu_usage, memory_percent, disk_percent}'
+    ssh user@$server 'uv run /path/to/monitor.py' | jq '{cpu_usage, memory_percent, disk_percent}'
 done
 
 # Continuous remote monitoring with timestamps
-ssh user@remote-server 'while true; do echo "$(date): $(python /path/to/monitor.py | jq -c .)"; sleep 300; done'
+ssh user@remote-server 'while true; do echo "$(date): $(uv run /path/to/monitor.py | jq -c .)"; sleep 300; done'
 
 # Save remote metrics to local file
-ssh user@remote-server 'python /path/to/monitor.py' > remote_metrics_$(date +%Y%m%d_%H%M%S).json
+ssh user@remote-server 'uv run /path/to/monitor.py' > remote_metrics_$(date +%Y%m%d_%H%M%S).json
 
 # Monitor and alert on high usage
-ssh user@remote-server 'python /path/to/monitor.py' | jq -r '
+ssh user@remote-server 'uv run /path/to/monitor.py' | jq -r '
   if .cpu_usage > 80 then "HIGH CPU: " + (.cpu_usage | tostring) + "%" 
   elif .memory_percent > 90 then "HIGH MEMORY: " + (.memory_percent | tostring) + "%" 
   elif .disk_percent > 95 then "HIGH DISK: " + (.disk_percent | tostring) + "%" 
@@ -202,7 +183,7 @@ for server in "${SERVERS[@]}"; do
     echo "Checking $server..."
     
     # Get metrics via SSH
-    metrics=$(ssh "$USER@$server" "python $SCRIPT_PATH" 2>/dev/null)
+    metrics=$(ssh "$USER@$server" "uv run $SCRIPT_PATH" 2>/dev/null)
     
     if [ $? -eq 0 ]; then
         cpu=$(echo "$metrics" | jq -r '.cpu_usage')
@@ -232,23 +213,6 @@ done
 - Disk I/O counters represent cumulative values since system boot
 - Memory values are in bytes; divide by 1024³ for GB conversion
 - The tool requires read access to system information (usually available to all users)
-
-## Troubleshooting
-
-### Permission Issues
-If you encounter permission errors, ensure the script has read access to system information. This is typically available to all users on most systems.
-
-### Missing psutil
-If psutil is not installed:
-```bash
-pip install psutil
-```
-
-### Python Version
-Ensure you're using Python 3.12 or higher:
-```bash
-python --version
-```
 
 ## License
 
